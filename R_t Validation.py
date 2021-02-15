@@ -94,7 +94,7 @@ sns.heatmap(miami.corr(), cmap="seismic", annot=True, vmin=-1, vmax=1)
 
 # %%
 # sns.set(rc={"figure.figsize": (40, 28)})
-#sns.set(font_scale=1)  # crazy big
+# sns.set(font_scale=1)  # crazy big
 g = sns.pairplot(miami, vars=["ML", "k", "cases"], palette="husl")
 
 # %%
@@ -143,7 +143,7 @@ miami["k_decrease"] = k_decrease
 miami.tail(39)
 
 # %%
-miami.set_index('date')
+miami.set_index("date")
 
 # %%
 # import datetime
@@ -151,12 +151,13 @@ miami.set_index('date')
 fixed_dates_df = miami.copy()
 fixed_dates_df["date"] = fixed_dates_df["date"].apply(pd.to_datetime)
 fixed_dates_df = fixed_dates_df.set_index(fixed_dates_df["date"])
-fixed_dates_df = fixed_dates_df[['cases']]
+fixed_dates_df = fixed_dates_df[["cases"]]
 fixed_dates_df
 
 # %%
 import matplotlib.pyplot as plt
 from pandas.plotting import register_matplotlib_converters
+
 sns.set(font_scale=1)
 
 register_matplotlib_converters()
@@ -165,6 +166,7 @@ fixed_dates_df.plot(color="purple")
 
 # %%
 from statsmodels.tsa.seasonal import seasonal_decompose
+
 sns.set(font_scale=0.7)
 result = seasonal_decompose(fixed_dates_df)
 fig = result.plot()
@@ -174,14 +176,15 @@ fixed_dates_df.info()
 
 # %%
 from fbprophet import Prophet
+
 model = Prophet()
-train_df = fixed_dates_df.rename(columns={"cases":'y'})
+train_df = fixed_dates_df.rename(columns={"cases": "y"})
 train_df["ds"] = train_df.index
 model.fit(train_df)
 
 # %%
 pd.plotting.register_matplotlib_converters()
-future = model.make_future_dataframe(12, freq='M', include_history=True)
+future = model.make_future_dataframe(12, freq="M", include_history=True)
 forecast = model.predict(future)
 model.plot(forecast)
 

@@ -530,4 +530,3 @@ icsa
 pdr.get_data_fred("ICSA", "07/01/2020", today).plot(
     title="Initial Weekly Unemployment Claims\n in the United States"
 )
-
