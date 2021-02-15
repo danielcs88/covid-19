@@ -1,17 +1,13 @@
-#!/usr/bin/env python
-# coding: utf-8
+# %%
+from IPython import get_ipython
 
-# In[1]:
-
-
+# %%
 get_ipython().run_line_magic("config", "IPCompleter.greedy=True")
 get_ipython().run_line_magic("config", "InlineBackend.figure_format = 'retina'")
 get_ipython().run_line_magic("matplotlib", "inline")
 
 
-# In[2]:
-
-
+# %%
 from datetime import datetime, timedelta
 
 today = datetime.strftime(datetime.now(), "%m-%d-%Y")
@@ -19,15 +15,11 @@ yesterday = datetime.strftime(datetime.now() - timedelta(1), "%m-%d-%Y")
 yesterday2 = datetime.strftime(datetime.now() - timedelta(1), "%m/%d/%y")
 
 
-# In[3]:
-
-
+# %%
 print(yesterday)
 
 
-# In[4]:
-
-
+# %%
 import urllib
 from urllib.error import HTTPError
 
@@ -59,9 +51,7 @@ data_c = pd.read_csv(url_counties)
 data_s = pd.read_csv(url_states)
 
 
-# In[5]:
-
-
+# %%
 # # Latest Unemployment Claims
 
 # latest_claims = int(master_f.claims[-1:])
@@ -71,36 +61,26 @@ data_s = pd.read_csv(url_states)
 # print(latest_claims)
 
 
-# In[6]:
-
-
+# %%
 # # Creating a Data Frame with both COV-19 cases and Unemployment Claims
 # latest = pd.DataFrame(
 #     {"date": [yesterday2], "cases": [int(usa_total)], "claims": [latest_claims]}
 # )
 
 
-# In[7]:
-
-
+# %%
 # master_f = master_f.append(latest, ignore_index=True)
 
 
-# In[8]:
-
-
+# %%
 data_s.info()
 
 
-# In[9]:
-
-
+# %%
 data2.info()
 
 
-# In[10]:
-
-
+# %%
 # Print Counties
 latest_date = data_c[-1:]
 latest_date = latest_date.date
@@ -109,9 +89,7 @@ latest_date = " ".join([str(elem) for elem in latest_date])
 print(latest_date)
 
 
-# In[11]:
-
-
+# %%
 pop_florida = pd.read_csv(
     "data/florida_county_population.csv"
 )  # Scraped from https://en.wikipedia.org/wiki/List_of_counties_in_Florida
@@ -133,9 +111,7 @@ fl_latest.to_csv("data/fl_latest.csv", index=False)
 fl_latest.sort_values(by=["cases"], ascending=False).head(15).reset_index(drop=True)
 
 
-# In[12]:
-
-
+# %%
 pop_states = pd.read_csv(
     "data/states_populations.csv"
 )  # Scraped from https://en.wikipedia.org/wiki/List_of_states_and_territories_of_the_United_States_by_population
@@ -149,33 +125,25 @@ top_states["cases_rate_per_population"] = round(
 top_states.sort_values(by=["cases"], ascending=False).reset_index(drop=True)
 
 
-# In[13]:
-
-
+# %%
 # Counties in the US with over 4000 cases
 top_counties = data_c[(data_c.cases > 4000) & (data_c.date == latest_date)]
 top_counties.sort_values(by=["cases"], ascending=False).reset_index(drop=True).head(15)
 
 
-# In[14]:
-
-
+# %%
 total_confirmed = lambda df: df.Confirmed.sum()
 total_recovered = lambda df: df.Recovered.sum()
 recovered_ratio = lambda df: df.Recovered.sum() / df.Confirmed.sum()
 
 
-# In[15]:
-
-
+# %%
 print(f"Total Confirmed: Worldwide {total_confirmed(data2):^5,}")
 print(f"Total Recovered: Worldwide {total_recovered(data2):^5,}")
 print(f"Recovered/Ratio: Worldwide {recovered_ratio(data2):.4f}")
 
 
-# In[16]:
-
-
+# %%
 for country in ["US", "Colombia"]:
     print()
     print(
@@ -188,12 +156,10 @@ for country in ["US", "Colombia"]:
         f"Recovered/Ratio: {country:<15} {recovered_ratio(data2.loc[(data2.Country_Region == country)]):.4f}"
     )
 
-
+# %% [markdown]
 # Unsurprisingly, nor the State of Florida nor the County of Miami-Dade are reporting recovered numbers.
 
-# In[17]:
-
-
+# %%
 for province_state in ["Capital District", "Florida"]:
     print()
     print(
@@ -207,9 +173,7 @@ for province_state in ["Capital District", "Florida"]:
     )
 
 
-# In[18]:
-
-
+# %%
 top_countries_v2 = pd.DataFrame()
 countries = []
 counts = []
@@ -225,17 +189,13 @@ top_countries_v2["country"] = countries
 top_countries_v2["total_confirmed"] = counts
 
 
-# In[19]:
-
-
+# %%
 top_countries_v2.sort_values(by=["total_confirmed"], ascending=False).reset_index(
     drop=True
 ).head(15)
 
 
-# In[20]:
-
-
+# %%
 # Countries with over 10000 confirmed COV-19 cases
 top_countries = data2[(data2.Confirmed > 10000)]
 top_countries.sort_values(by=["Confirmed"], ascending=False).reset_index(
@@ -243,91 +203,69 @@ top_countries.sort_values(by=["Confirmed"], ascending=False).reset_index(
 ).head(15)
 
 
-# In[21]:
-
-
+# %%
 # Total cases in Colombia
 colombia = data2.query("Country_Region == 'Colombia'").reset_index(drop=True)
 colombia.sort_values(by=["Confirmed"], ascending=False).reset_index(drop=True)
 
 
-# In[22]:
-
-
+# %%
 # Total cases in Venezuela
 vzla = data2.query("Country_Region == 'Venezuela'").reset_index(drop=True)
 vzla
 
 
-# In[23]:
-
-
+# %%
 # Total cases in Miami
 miami = data2.query("FIPS == 12086").reset_index(drop=True)
 miami
 
 
-# In[24]:
-
-
+# %%
 miami_timeline = data_c.query('county == "Miami-Dade"').reset_index(drop=True)
 miami_timeline
 # miami_timeline["k"] = round(top_states["deaths"] / top_states["cases"], 4)
 
 
-# In[25]:
-
-
+# %%
 # Total cases in Florida
 florida = data2.loc[(data2.Province_State == "Florida"), "Confirmed"].sum()
 print(f"Total Cases in Florida: {florida: ,}")
 
 
-# In[26]:
-
-
+# %%
 s_florida = data2[
     ((data2.FIPS == 12011) | (data2.FIPS == 12086) | (data2.FIPS == 12099))
 ].reset_index(drop=True)
 s_florida
 
 
-# In[27]:
-
-
+# %%
 # Count of total cases in South Florida
 sflorida_sum = s_florida.loc[s_florida["Confirmed"] > 0, "Confirmed"].sum()
 print(f"South Florida (Miami-Dade, Broward, Palm Beach): {sflorida_sum: ,}")
 
 
-# In[28]:
-
-
+# %%
 # Proportion of South Florida cases relative to Florida
 print("South Florida Proportion:", round(sflorida_sum / florida, 4))
 
 
-# In[29]:
-
-
+# %%
 # Total cases in the United States
 usa = data2.loc[(data2.Country_Region == "US"), "Confirmed"].sum()
 print(f"Total Cases in the US: {usa: ,}")
 
 
-# In[30]:
-
-
+# %%
 # Total cases Worldwide
 worldwide = data2["Confirmed"].sum()
 print(f"Total Cases Worldwide: {worldwide: ,}")
 
-
+# %% [markdown]
 # ### Consolidating cases per date
 
-# In[31]:
-
-
+# %%
 dates = data_s["date"].unique()
 
 rows = len(dates)
@@ -353,9 +291,7 @@ cases_df = pd.DataFrame(data=cases_dict)
 master = dates_df.join(cases_df)
 
 
-# In[32]:
-
-
+# %%
 # # Cases in Florida Consolidation
 
 dates = data_s["date"].unique()
@@ -386,9 +322,7 @@ master_fl["date"] = pd.to_datetime(master_fl["date"])
 # master_fl.tail(48)
 
 
-# In[33]:
-
-
+# %%
 # # Cases in Miami-Dade County Consolidation
 
 dates = data_s["date"].unique()
@@ -415,9 +349,7 @@ cases_df_mdc = pd.DataFrame(data=cases_dict_mdc)
 master_mdc = dates_df.join(cases_df_mdc)
 
 
-# In[34]:
-
-
+# %%
 import datetime as dt
 
 import matplotlib.dates as mdates
@@ -464,9 +396,7 @@ plt.savefig("figures/usa_cases.svg", bbox_inches="tight")
 plt.show()
 
 
-# In[35]:
-
-
+# %%
 us = pd.read_csv(
     "https://raw.githubusercontent.com/nytimes/covid-19-data/master/us.csv",
     parse_dates=True,
@@ -475,33 +405,23 @@ us = pd.read_csv(
 us["new_cases"] = us[["cases"]].diff()
 
 
-# In[36]:
-
-
+# %%
 us
 
 
-# In[37]:
-
-
+# %%
 # us.plot()
 
 
-# In[38]:
-
-
+# %%
 master_fl["new_cases"] = master_fl[["cases"]].diff()
 
 
-# In[39]:
-
-
+# %%
 master_fl = master_fl.set_index("date")
 
 
-# In[40]:
-
-
+# %%
 plt.figure(figsize=(10, 8))
 plt.plot(us["new_cases"], label="United States")
 plt.plot(master_fl["new_cases"], label="Florida")
@@ -515,24 +435,18 @@ plt.savefig("figures/new_cases.svg", bbox_inches="tight")
 plt.show()
 
 
-# In[41]:
-
-
+# %%
 florida
 
 
-# In[42]:
-
-
+# %%
 florida = data_c.query("state == 'Florida'").sort_values(by=["county", "date"])
 florida["new_cases"] = florida[["cases"]].diff()
 
 florida.query("date == '2020-06-14'").sort_values(by="new_cases", ascending=False)
 
 
-# In[43]:
-
-
+# %%
 import datetime as dt
 
 import matplotlib.dates as mdates
@@ -577,41 +491,29 @@ plt.savefig("figures/fl_cases.svg", bbox_inches="tight")
 plt.show()
 
 
-# In[44]:
-
-
+# %%
 florida = data_c.query("state == 'Florida'").reset_index(drop=True)
 
 
-# In[45]:
-
-
+# %%
 florida = florida.sort_values(by=["county", "date"]).reset_index(drop=True)
 
 
-# In[46]:
-
-
+# %%
 florida["new_cases"] = florida.cases.diff()
 
 
-# In[47]:
-
-
+# %%
 june_fl = florida.query("date >= '2020-06-01'")
 
 
-# In[48]:
-
-
+# %%
 # june_fl[["date", "county", "new_cases"]].sort_values(
 #     by=["new_cases", "date"], ascending=False
 # ).set_index("county").groupby("county").plot()
 
 
-# In[49]:
-
-
+# %%
 import datetime
 
 import pandas_datareader as pdr
@@ -624,9 +526,8 @@ icsa = pdr.get_data_fred("ICSA", start, today)
 icsa
 
 
-# In[50]:
-
-
+# %%
 pdr.get_data_fred("ICSA", "07/01/2020", today).plot(
     title="Initial Weekly Unemployment Claims\n in the United States"
 )
+

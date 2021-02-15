@@ -1,23 +1,29 @@
-#!/usr/bin/env python
-# coding: utf-8
+# %%
+from IPython import get_ipython
 
-# # Florida $R_0$ per county
+# %% [markdown]
+"""
+# Florida $R_0$ per county
+"""
 
-# Implementation using [Kevin Systrom's model](https://github.com/k-sys/covid-19) and using the adaptation by [Ashutosh Sanzgiri per county](https://github.com/k-sys/covid-19/blob/e95ae71f1eea827baffce2d308f767634951f9e3/Realtime_R0_by_county.ipynb) to analyze the case for Florida and its counties.
+# %% [markdown]
+"""
+Implementation using [Kevin Systrom's model](https://github.com/k-sys/covid-19)
+and using the adaptation by [Ashutosh Sanzgiri per
+county](https://github.com/k-sys/covid-19/blob/e95ae71f1eea827baffce2d308f767634951f9e3/Realtime_R0_by_county.ipynb)
+to analyze the case for Florida and its counties.
+"""
 
-# In[1]:
-
-
+# %%
 get_ipython().run_line_magic("config", "InlineBackend.figure_format = 'retina'")
 
 
-# In[2]:
-
-
+# %%
 import ipywidgets as widgets
 import numpy as np
 import pandas as pd
 from IPython.display import clear_output
+from IPython.display import display
 from matplotlib import dates as mdates
 from matplotlib import pyplot as plt
 from matplotlib import ticker
@@ -41,9 +47,7 @@ FILTERED_REGION_CODES = [
 ]
 
 
-# In[3]:
-
-
+# %%
 from cycler import cycler
 
 custom = cycler(
@@ -65,9 +69,7 @@ plt.rc("axes", prop_cycle=custom)
 plt.rcParams["figure.dpi"] = 140
 
 
-# In[4]:
-
-
+# %%
 def highest_density_interval(pmf, p=0.9):
     # If we pass a DataFrame, just call this recursively on the columns
     if isinstance(pmf, pd.DataFrame):
@@ -88,15 +90,16 @@ def highest_density_interval(pmf, p=0.9):
     return pd.Series([low, high], index=[f"Low_{p*100:.0f}", f"High_{p*100:.0f}"])
 
 
-# # Real-World Application to US Data (by counties)
-#
-# ### Setup
-#
-# Load US state case data from The New York Times: County Data
+# %% [markdown]
+"""
+## Real-World Application to US Data (by counties)
 
-# In[5]:
+### Setup
 
+Load US state case data from The New York Times: County Data
+"""
 
+# %%
 url_counties = (
     "https://raw.githubusercontent.com/nytimes/covid-19-data/master/us-counties.csv"
 )
@@ -110,38 +113,33 @@ latest_date = " ".join([str(elem) for elem in latest_date])
 print(latest_date)
 
 
-# In[6]:
-
-
+# %%
 state_list = sorted(set(counties.state.unique()) - set(FILTERED_REGIONS))
 len(state_list)  # Include District of Columbia
 
 
-# In[7]:
-
-
+# %%
 w = widgets.Dropdown(
     options=state_list, description="Select state:", value="Florida", disabled=False,
 )
 display(w)
 
+# %% [markdown]
+"""
+### Filters
 
-# ### Filters
-# * Selected state
-# * Remove counties listed as "Unknown"
-# * Remove rows with less than `county_case_filter` cases
-# * Remove counties with less than `county_row_filter` rows after smoothing
+* Selected state
+* Remove counties listed as "Unknown"
+* Remove rows with less than `county_case_filter` cases
+* Remove counties with less than `county_row_filter` rows after smoothing
+"""
 
-# In[8]:
-
-
+# %%
 county_case_filter = 10
 county_row_filter = 5
 
 
-# In[9]:
-
-
+# %%
 selected_state = w.value
 counties = counties[counties.state == selected_state].copy()
 counties = counties[counties.county != "Unknown"].copy()
@@ -149,48 +147,36 @@ counties = counties[counties.cases >= county_case_filter].copy()
 counties.shape
 
 
-# In[10]:
-
-
+# %%
 counties.tail()
 print(len(counties))
 
 
-# In[11]:
-
-
+# %%
 counties = counties[["date", "county", "cases"]].copy()
 counties["date"] = pd.to_datetime(counties["date"])
 counties = counties.set_index(["county", "date"]).squeeze().sort_index()
 
 
-# In[12]:
-
-
+# %%
 counties
 
 
-# In[13]:
-
-
+# %%
 counties_g = (
     counties.groupby(["county"]).count().reset_index().rename({"cases": "rows"}, axis=1)
 )
 counties_g
 
 
-# In[14]:
-
-
+# %%
 county_list = counties_g[counties_g.rows >= county_row_filter]["county"].tolist()
 print(len(county_list))
 
 md = county_list.index("Miami-Dade")
 
 
-# In[15]:
-
-
+# %%
 county_name = county_list[md]
 
 
@@ -234,9 +220,7 @@ ax.get_figure().set_facecolor("w")
 plt.savefig("figures/mdc_cases.svg", bbox_inches="tight")
 
 
-# In[16]:
-
-
+# %%
 # Gamma is 1/serial interval
 # https://wwwnc.cdc.gov/eid/article/26/7/20-0282_article
 # https://www.nejm.org/doi/full/10.1056/NEJMoa2001316
@@ -303,9 +287,7 @@ def get_posteriors(sr, sigma=0.15):
 posteriors, log_likelihood = get_posteriors(smoothed, sigma=0.25)
 
 
-# In[17]:
-
-
+# %%
 # ax = posteriors.plot(
 #     title=f"{county_name} | Daily Posterior for $R_t$ as of {latest_date}",
 #     legend=False,
@@ -318,9 +300,7 @@ posteriors, log_likelihood = get_posteriors(smoothed, sigma=0.25)
 # ax.set_xlabel("$R_t$");
 
 
-# In[18]:
-
-
+# %%
 # # Note that this takes a while to execute - it's not the most efficient algorithm
 # hdis = highest_density_interval(posteriors, p=0.9)
 
@@ -332,9 +312,7 @@ posteriors, log_likelihood = get_posteriors(smoothed, sigma=0.25)
 # result.tail()
 
 
-# In[19]:
-
-
+# %%
 sigmas = np.linspace(1 / 20, 1, 20)
 
 targets = counties.index.get_level_values("county").isin(county_list)
@@ -379,9 +357,7 @@ print(f"Continuing with {len(results)} counties / {len(county_list)}")
 print("Done.")
 
 
-# In[20]:
-
-
+# %%
 # Each index of this array holds the total of the log likelihoods for
 # the corresponding index of the sigmas array.
 total_log_likelihoods = np.zeros_like(sigmas)
@@ -403,14 +379,17 @@ ax.set_title(f"Maximum Likelihood value for $\sigma$ = {sigma:.2f}")
 ax.plot(sigmas, total_log_likelihoods)
 ax.axvline(sigma, color="k", linestyle=":")
 
+# %% [markdown]
+"""
+### Compile Final Results
 
-# ### Compile Final Results
-#
-# Given that we've selected the optimal $\sigma$, let's grab the precalculated posterior corresponding to that value of $\sigma$ for each state. Let's also calculate the 90% and 50% highest density intervals (this takes a little while) and also the most likely value.
+Given that we've selected the optimal $\sigma$, let's grab the precalculated
+posterior corresponding to that value of $\sigma$ for each state. Let's also
+calculate the 90% and 50% highest density intervals (this takes a little while)
+and also the most likely value.
+"""
 
-# In[21]:
-
-
+# %%
 final_results = None
 hdi_error_list = []
 
@@ -435,12 +414,10 @@ for county_name, result in results.items():
 print(f"HDI error list: {hdi_error_list}")
 print("Done.")
 
-
+# %% [markdown]
 # ### Plot All Counties meeting criteria
 
-# In[22]:
-
-
+# %%
 def plot_rt(result, ax, county_name):
 
     ax.set_title(f"{county_name}")
@@ -522,28 +499,20 @@ def plot_rt(result, ax, county_name):
     fig.set_facecolor("w")
 
 
-# In[23]:
-
-
+# %%
 fr_rt = final_results[["ML", "Low_90", "High_90"]]
 
 
-# In[24]:
-
-
+# %%
 final_results
 
 
-# In[25]:
-
-
+# %%
 get_ipython().run_line_magic("time", "")
 final_counties = list(fr_rt.index.get_level_values("county").unique())
 
 
-# In[26]:
-
-
+# %%
 c = widgets.Dropdown(
     options=final_counties,
     description="Select county:",
@@ -553,15 +522,11 @@ c = widgets.Dropdown(
 display(c)
 
 
-# In[27]:
-
-
+# %%
 county_name = c.value
 
 
-# In[28]:
-
-
+# %%
 fr_rt = (
     fr_rt.loc[(fr_rt.index.get_level_values("county") == county_name)]
     .reset_index()
@@ -569,15 +534,11 @@ fr_rt = (
 )
 
 
-# In[29]:
-
-
+# %%
 result = fr_rt.drop(columns=["county"])
 
 
-# In[30]:
-
-
+# %%
 fig, ax = plt.subplots(figsize=(600 / 72, 400 / 72))
 
 plot_rt(result, ax, county_name)
@@ -587,9 +548,7 @@ ax.xaxis.set_major_formatter(mdates.DateFormatter("%b %d"))
 plt.savefig("figures/mdc_rt.svg", bbox_inches="tight")
 
 
-# In[31]:
-
-
+# %%
 ncols = 3
 nrows = int(np.ceil(len(final_results.groupby("county")) / ncols))
 
@@ -602,36 +561,28 @@ fig.tight_layout()
 fig.set_facecolor("w")
 plt.savefig("figures/fl_counties_rt.svg")
 
-
+# %% [markdown]
 # ### Export Data to CSV
 
-# In[32]:
-
-
+# %%
 # Uncomment the following line if you'd like to export the data
 final_results.to_csv(f"data/rt_{selected_state}.csv")
 
-
+# %% [markdown]
 # ### Standings
 
-# In[33]:
-
-
+# %%
 FULL_COLOR = [0.7, 0.7, 0.7]
 NONE_COLOR = [179 / 255, 35 / 255, 14 / 255]
 PARTIAL_COLOR = [0.5, 0.5, 0.5]
 ERROR_BAR_COLOR = [0.3, 0.3, 0.3]
 
 
-# In[34]:
-
-
+# %%
 final_results
 
 
-# In[35]:
-
-
+# %%
 filtered = final_results.index.get_level_values(0).isin(FILTERED_REGIONS)
 mr = final_results.loc[~filtered].groupby(level=0)[["ML", "High_90", "Low_90"]].last()
 
@@ -671,34 +622,26 @@ plot_standings(mr, title=f"Most Likely Recent $R_t$ by County as of {latest_date
 plt.savefig("figures/fl_rt.svg", bbox_inches="tight")
 
 
-# In[36]:
-
-
+# %%
 mr.sort_values("High_90", inplace=True)
 plot_standings(
     mr, title=f"Most Likely (High) Recent $R_t$ by County as of {latest_date}"
 )
 
 
-# In[37]:
-
-
+# %%
 show = mr[mr.High_90.le(1)].sort_values("ML")
 fig, ax = plot_standings(show, title=f"Likely Under Control \n {latest_date}")
 
 
-# In[38]:
-
-
+# %%
 show = mr[mr.Low_90.ge(1.0)].sort_values("Low_90")
 fig, ax = plot_standings(show, title=f"Likely Not Under Control \n {latest_date}")
 # plt.tight_layout(3)
 plt.savefig("figures/fl_rt_uncontrolled.svg", bbox_inches="tight")
 
 
-# In[39]:
-
-
+# %%
 rt_url = "data/rt_Florida.csv"
 rt_florida = pd.read_csv(rt_url)
 latest_rt_florida = rt_florida[rt_florida.date == latest_date]
@@ -730,15 +673,11 @@ latest_rt_florida["cases_rate_per_population"] = list(
 latest_rt_florida.reset_index(drop=True)
 
 
-# In[40]:
-
-
+# %%
 latest_rt_florida.to_csv(f"data/latest_rt_florida.csv")
 
 
-# In[41]:
-
-
+# %%
 # url = 'https://raw.githubusercontent.com/plotly/datasets/master/geojson-counties-fips.json'
 url = "https://tinyurl.com/yc4q2rg9"
 
@@ -820,24 +759,18 @@ fig.update_layout(
 fig.show()
 
 
-# In[42]:
-
-
+# %%
 # import plotly.io as pio
 
 # pio.write_json(fig, "map.json")
 
 
-# In[43]:
-
-
+# %%
 # with open("html/florida_rt.html", "w") as f:
 #     f.write(fig.to_html(include_plotlyjs="cdn"))
 
 
-# In[44]:
-
-
+# %%
 with open("../danielcs88.github.io/html/florida_rt.html", "w") as f:
     f.write(
         '<meta name="viewport" content="width=device-width, initial-scale=1.0">'
@@ -845,21 +778,15 @@ with open("../danielcs88.github.io/html/florida_rt.html", "w") as f:
     )
 
 
-# In[45]:
-
-
+# %%
 get_ipython().system(" cd ../danielcs88.github.io/ && git pull")
 
 
-# In[46]:
-
-
+# %%
 get_ipython().system(
     ' cd ../danielcs88.github.io/ && git add --all && git commit -m "Update" && git push'
 )
 
 
-# In[47]:
-
-
+# %%
 # ! git add --all && git commit -m "Update" && git push
