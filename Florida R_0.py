@@ -1,6 +1,3 @@
-# %%
-from IPython import get_ipython
-
 # %% [markdown]
 """
 # Florida $R_0$ per county
@@ -14,11 +11,14 @@ county](https://github.com/k-sys/covid-19/blob/e95ae71f1eea827baffce2d308f767634
 to analyze the case for Florida and its counties.
 """
 
+
 # %%
+from IPython import get_ipython
+
 get_ipython().run_line_magic("config", "InlineBackend.figure_format = 'retina'")
 
-
 # %%
+from numba import jit
 import ipywidgets as widgets
 import numpy as np
 import pandas as pd
@@ -70,6 +70,7 @@ plt.rcParams["figure.dpi"] = 140
 
 
 # %%
+@jit
 def highest_density_interval(pmf, p=0.9):
     # If we pass a DataFrame, just call this recursively on the columns
     if isinstance(pmf, pd.DataFrame):
@@ -99,6 +100,7 @@ def highest_density_interval(pmf, p=0.9):
 Load US state case data from The New York Times: County Data
 """
 
+
 # %%
 url_counties = (
     "https://raw.githubusercontent.com/nytimes/covid-19-data/master/us-counties.csv"
@@ -108,7 +110,7 @@ counties = pd.read_csv(url_counties)
 # Print Counties
 latest_date = counties[-1:]
 latest_date = latest_date.date
-latest_date = " ".join([str(elem) for elem in latest_date])
+latest_date = " ".join(str(elem) for elem in latest_date)
 
 print(latest_date)
 
@@ -180,6 +182,7 @@ md = county_list.index("Miami-Dade")
 county_name = county_list[md]
 
 
+@jit
 def prepare_cases(cases, cutoff=1):
     new_cases = cases.diff()
 
@@ -232,6 +235,7 @@ R_T_MAX = 12
 r_t_range = np.linspace(0, R_T_MAX, R_T_MAX * 100 + 1)
 
 
+@jit
 def get_posteriors(sr, sigma=0.15):
 
     # (1) Calculate Lambda
@@ -331,13 +335,7 @@ for county_name, cases in counties_to_process.groupby(level="county"):
         skipped_counties.append(county_name)
         continue
 
-    result = {}
-
-    # Holds all posteriors with every given value of sigma
-    result["posteriors"] = []
-
-    # Holds the log likelihood across all k for each value of sigma
-    result["log_likelihoods"] = []
+    result = {"posteriors": [], "log_likelihoods": []}
 
     try:
         for sigma in sigmas:
@@ -409,8 +407,6 @@ for county_name, result in results.items():
     except:
         print(f"HDI failed for {county_name}")
         hdi_error_list.append(county_name)
-        pass
-
 print(f"HDI error list: {hdi_error_list}")
 print("Done.")
 
