@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 # %% [markdown]
 """
 # Florida $R_0$ per county
@@ -18,12 +19,10 @@ from IPython import get_ipython
 get_ipython().run_line_magic("config", "InlineBackend.figure_format = 'retina'")
 
 # %%
-from numba import jit
 import ipywidgets as widgets
 import numpy as np
 import pandas as pd
-from IPython.display import clear_output
-from IPython.display import display
+from IPython.display import clear_output, display
 from matplotlib import dates as mdates
 from matplotlib import pyplot as plt
 from matplotlib import ticker
@@ -34,17 +33,17 @@ from matplotlib.dates import date2num, num2date
 from scipy import stats as sps
 from scipy.interpolate import interp1d
 
-FILTERED_REGIONS = [
-    # "Virgin Islands",
-    # "American Samoa",
-    # "Northern Mariana Islands",
-    # "Guam",
-    # "Puerto Rico",
-]
+# FILTERED_REGIONS = [
+# "Virgin Islands",
+# "American Samoa",
+# "Northern Mariana Islands",
+# "Guam",
+# "Puerto Rico",
+# ]
 
-FILTERED_REGION_CODES = [
-    # "AS", "GU", "PR", "VI", "MP"
-]
+# FILTERED_REGION_CODES = [
+# "AS", "GU", "PR", "VI", "MP"
+# ]
 
 
 # %%
@@ -70,7 +69,8 @@ plt.rcParams["figure.dpi"] = 140
 
 
 # %%
-@jit
+
+
 def highest_density_interval(pmf, p=0.9):
     # If we pass a DataFrame, just call this recursively on the columns
     if isinstance(pmf, pd.DataFrame):
@@ -182,7 +182,6 @@ md = county_list.index("Miami-Dade")
 county_name = county_list[md]
 
 
-@jit
 def prepare_cases(cases, cutoff=1):
     new_cases = cases.diff()
 
@@ -235,7 +234,6 @@ R_T_MAX = 12
 r_t_range = np.linspace(0, R_T_MAX, R_T_MAX * 100 + 1)
 
 
-@jit
 def get_posteriors(sr, sigma=0.15):
 
     # (1) Calculate Lambda
