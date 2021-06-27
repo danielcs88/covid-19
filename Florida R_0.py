@@ -69,8 +69,6 @@ plt.rcParams["figure.dpi"] = 140
 
 
 # %%
-
-
 def highest_density_interval(pmf, p=0.9):
     # If we pass a DataFrame, just call this recursively on the columns
     if isinstance(pmf, pd.DataFrame):
@@ -116,7 +114,8 @@ print(latest_date)
 
 
 # %%
-state_list = sorted(set(counties.state.unique()) - set(FILTERED_REGIONS))
+# state_list = sorted(set(counties.state.unique()) - set(FILTERED_REGIONS))
+state_list = sorted(set(counties.state.unique()))
 len(state_list)  # Include District of Columbia
 
 
